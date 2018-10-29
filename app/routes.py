@@ -10,11 +10,6 @@ from app.models import User
 def index():
     return "Hello, World!"
 
-@app.route('/index')
-def act_index():
-    if current_user.is_authenticated:
-        return jsonify({'flag':1})
-
 @app.route('/check-login', methods=['POST'])
 def login():
     if current_user.is_authenticated:
@@ -23,7 +18,7 @@ def login():
     if user is None or not user.check_password(request.args['password']):
         return redirect(url_for('/'))
     login_user(user)
-    return redirect(url_for('index'))
+    return jsonify({'flag':1})
 
 @app.route('/logout')
 def logout():
