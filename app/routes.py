@@ -14,8 +14,8 @@ def index():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    user = User.query.filter_by(username=request.args['username']).first()
-    if user is None or not user.check_password(request.args['password']):
+    user = User.query.filter_by(username=request.form['username']).first()
+    if user is None or not user.check_password(request.form['password']):
         return redirect(url_for('/'))
     login_user(user)
     return jsonify({'flag':1})
