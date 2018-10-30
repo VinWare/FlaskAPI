@@ -5,7 +5,8 @@ from flask import url_for, redirect, request, jsonify
 from app import app, db
 from flask_login import current_user, login_user, logout_user
 
-from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish, EmployeeSchema
+from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish, EmployeeSchema, OrderDishSchema, \
+    RestaurantOrderSchema
 
 
 @app.route('/')
@@ -37,7 +38,17 @@ def room_check():
 
 @app.route('/order-index')
 def order_index():
-    return jsonify(Dish.query.all.filter(Dish.begin_time <= datetime.datetime.now().time()).filter(datetime.datetime.now().time() < Dish.to_time))
+    data = RestaurantOrder.query.all()
+    for datum in data:
+        for order in datum.orders:
+            print(order)
+    # data = OrderDish.query.all()
+    # orderDishSchema = OrderDishSchema(many=True)
+    # output = orderDishSchema.dump(data).data
+    restaurantOrderSchema = RestaurantOrderSchema(many=True)
+    output = restaurantOrderSchema.dump(data).data
+    return jsonify(output)
+    # return jsonify(Dish.query.all.filter(Dish.begin_time <= datetime.datetime.now().time()).filter(datetime.datetime.now().time() < Dish.to_time))
 
 @app.route('/supply-index')
 def supply_index():

@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from marshmallow import fields
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, loginManager, ma
@@ -53,14 +54,6 @@ class RoomRes(db.Model):
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'), primary_key=True)
     status = db.Column(db.String(15))
 
-class Dish(db.Model):
-    dish_id = db.Column(db.Integer, primary_key=True)
-    dish_name = db.Column(db.String(127))
-    dish_cost = db.Column(db.Integer)
-    from_time = db.Column(db.Time)
-    to_time = db.Column(db.Time)
-    type = db.Column(db.String(15))
-
 class Supply(db.Model):
     supply_id = db.Column(db.Integer, primary_key=True)
     supply_name = db.Column(db.String(127))
@@ -82,16 +75,39 @@ class EmployeeSchema(ma.ModelSchema):
     class Meta:
         model = Employee
 
-class RestaurantOrder(db.Model):
-    order_id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.Integer)
-    order_time = db.Column(db.Time)
-
-
 class OrderDish(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('restaurant_order.order_id'), primary_key=True)
     dish_id = db.Column(db.Integer, db.ForeignKey('dish.dish_id'), primary_key=True)
     quantity = db.Column(db.Integer)
+
+class Dish(db.Model):
+    dish_id = db.Column(db.Integer, primary_key=True)
+    dish_name = db.Column(db.String(127))
+    dish_cost = db.Column(db.Integer)
+    from_time = db.Column(db.Time)
+    to_time = db.Column(db.Time)
+    type = db.Column(db.String(15))
+    orders = db.relationship('OrderDish', backref='Dish', lazy='dynamic')
+
+class RestaurantOrder(db.Model):
+    order_id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer)
+    order_time = db.Column(db.Time)
+    orders = db.relationship('OrderDish', backref='orderdet', lazy='dynamic')
+
+class RestaurantOrderSchema(ma.ModelSchema):
+    class Meta:
+        model = RestaurantOrder
+
+class DishSchema(ma.ModelSchema):
+    class Meta:
+        model = Dish
+
+class OrderDishSchema(ma.ModelSchema):
+    class Meta:
+        model = OrderDish
+        fields = ('order_id', 'quantity', 'nested')
+        nested = ma.Nested(DishSchema)
 
 @loginManager.user_loader
 def load_user(id):
