@@ -59,8 +59,8 @@ def reserve():
     data = request.get_json()
     pass
 
-@app.route('/emp-details')
+@app.route('/emp-details', methods=['GET', 'POST'])
 def emp_details():
-    if current_user.is_anonymous:
-        return jsonify({'flag':0})
+    # if current_user.is_anonymous:
+    #     return jsonify({'flag':0})
     return jsonify(Employee.query.all())
