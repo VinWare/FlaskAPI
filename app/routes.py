@@ -5,7 +5,7 @@ from flask import url_for, redirect, request, jsonify
 from app import app, db
 from flask_login import current_user, login_user, logout_user
 
-from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder
+from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish
 
 
 @app.route('/')
@@ -43,13 +43,13 @@ def order_index():
 def supply_index():
     return jsonify(Supply.query.all.filter(Supply.quantity > 0))
 
-@app.route('/actual-order', method=['GET'])
+@app.route('/actual-order', methods=['POST'])
 def actual_order():
     pass
-    restaurant = RestaurantOrder(order_id=request.args.get('order_id'), room_id=request.args.get('room_id'), order_time=datetime.datetime.now().time())
+    restaurant = RestaurantOrder(room_id=request.form['room_id'], order_time=datetime.datetime.now().time())
     db.session.add(restaurant)
-    for order in data['orders']:
-        orderDish = OrderDish(order_id=data['order_id'], dish_id=order['dish_id'], quantity=order['quantity'])
+    for order in request.form['orders']:
+        orderDish = OrderDish(order_id=request.form['order_id'], dish_id=order['dish_id'], quantity=order['quantity'])
         db.session.add(orderDish)
     db.commit()
     return jsonify({"Result":"OK"})

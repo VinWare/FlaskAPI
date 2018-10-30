@@ -79,6 +79,7 @@ class RestaurantOrder(db.Model):
     room_id = db.Column(db.Integer)
     order_time = db.Column(db.Time)
 
+
 class OrderDish(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('restaurant_order.order_id'), primary_key=True)
     dish_id = db.Column(db.Integer, db.ForeignKey('dish.dish_id'), primary_key=True)
