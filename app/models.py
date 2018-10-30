@@ -1,7 +1,8 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db,loginManager
+from app import db, loginManager, ma
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -73,6 +74,13 @@ class Employee(db.Model):
     emp_addr = db.Column(db.String(255))
     emp_phone = db.Column(db.String(15))
     emp_email = db.Column(db.String(255))
+
+    def as_dict(self):
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+
+class EmployeeSchema(ma.ModelSchema):
+    class Meta:
+        model = Employee
 
 class RestaurantOrder(db.Model):
     order_id = db.Column(db.Integer, primary_key=True)

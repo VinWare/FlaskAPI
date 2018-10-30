@@ -5,7 +5,7 @@ from flask import url_for, redirect, request, jsonify
 from app import app, db
 from flask_login import current_user, login_user, logout_user
 
-from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish
+from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish, EmployeeSchema
 
 
 @app.route('/')
@@ -63,4 +63,7 @@ def reserve():
 def emp_details():
     # if current_user.is_anonymous:
     #     return jsonify({'flag':0})
-    return jsonify(Employee.query.all())
+    emp_data = Employee.query.all()
+    employeeSchema = EmployeeSchema(many=True)
+    output = employeeSchema.dump(emp_data).data
+    return jsonify(output)
