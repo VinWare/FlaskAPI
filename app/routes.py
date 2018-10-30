@@ -43,17 +43,16 @@ def order_index():
 def supply_index():
     return jsonify(Supply.query.all.filter(Supply.quantity > 0))
 
-@app.route('/actual-order')
+@app.route('/actual-order', method=['GET'])
 def actual_order():
     pass
-    # data = request.get_json()
-    # restaurant = RestaurantOrder(order_id=data['order_id'], room_id=data['room_id'], order_time=datetime.datetime.now().time())
-    # db.session.add(restaurant)
-    # for order in data['orders']:
-    #     orderDish = OrderDish(order_id=data['order_id'], dish_id=order['dish_id'], quantity=order['quantity'])
-    #     db.session.add(orderDish)
-    # db.commit()
-    # return jsonify({"Result":"OK"})
+    restaurant = RestaurantOrder(order_id=request.args.get('order_id'), room_id=request.args.get('room_id'), order_time=datetime.datetime.now().time())
+    db.session.add(restaurant)
+    for order in data['orders']:
+        orderDish = OrderDish(order_id=data['order_id'], dish_id=order['dish_id'], quantity=order['quantity'])
+        db.session.add(orderDish)
+    db.commit()
+    return jsonify({"Result":"OK"})
 
 @app.route('/reserve')
 def reserve():
