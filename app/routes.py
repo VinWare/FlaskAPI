@@ -5,7 +5,7 @@ from flask import url_for, redirect, request, jsonify
 from app import app, db
 from flask_login import current_user, login_user, logout_user
 
-from app.models import User, Dish, Supply
+from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder
 
 
 @app.route('/')
@@ -15,10 +15,11 @@ def index():
 @app.route('/check-login', methods=['POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    user = User.query.filter_by(username=request.form['username']).first()
-    if user is None or not user.check_password(request.form['password']):
-        return redirect(url_for('/'))
+        return jsonify({'flag':1})
+    data = request.get_json()
+    user = User.query.filter_by(username=data['username']).first()
+    if user is None or not user.check_password(data['password']):
+        return jsonify({'flag':0})
     login_user(user)
     return jsonify({'flag':1})
 
@@ -29,6 +30,9 @@ def logout():
 
 @app.route('/room-check')
 def room_check():
+    data = request.json()
+    if(data['room'] is not 'None'):
+        return jsonify(Room.query.all.filter())
     pass
 
 @app.route('/order-index')
@@ -41,13 +45,23 @@ def supply_index():
 
 @app.route('/actual-order')
 def actual_order():
-    data = request.get_json()
-    for order in data:
-        pass
+    pass
+    # data = request.get_json()
+    # restaurant = RestaurantOrder(order_id=data['order_id'], room_id=data['room_id'], order_time=datetime.datetime.now().time())
+    # db.session.add(restaurant)
+    # for order in data['orders']:
+    #     orderDish = OrderDish(order_id=data['order_id'], dish_id=order['dish_id'], quantity=order['quantity'])
+    #     db.session.add(orderDish)
+    # db.commit()
+    # return jsonify({"Result":"OK"})
 
 @app.route('/reserve')
 def reserve():
     data = request.get_json()
-    check_valid_reserve()
     pass
 
+@app.route('/emp-details')
+def emp_details():
+    if current_user.is_anonymous:
+        return jsonify({'flag':0})
+    return jsonify(Employee.query.all())

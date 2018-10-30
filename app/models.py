@@ -25,6 +25,7 @@ class Building(db.Model):
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     num = db.Column(db.Integer)
+    building_id = db.Column(db.Integer, db.ForeignKey('building.id'))
     floor_num = db.Column(db.Integer)
     type = db.Column(db.String(31))
     num_ppl = db.Column(db.Integer)
@@ -34,7 +35,7 @@ class Room(db.Model):
     res = db.relationship('RoomRes', backref='room', lazy='dynamic')
 
 class RoomPrice(db.Model):
-    room_id = db.Column(db.Integer, db.ForeignKey('Room.id'), primary_key=True)
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), primary_key=True)
     date = db.Column(db.Date, primary_key=True)
     price = db.Column(db.Integer)
 
@@ -47,8 +48,8 @@ class Reservation(db.Model):
     room_res = db.relationship('RoomRes', backref='res', lazy='dynamic')
 
 class RoomRes(db.Model):
-    res_id = db.Column(db.Integer, db.ForeignKey('Reservation.res_id'), primary_key=True)
-    room_id = db.Column(db.Integer, db.ForeignKey('Room.id'), primary_key=True)
+    res_id = db.Column(db.Integer, db.ForeignKey('reservation.res_id'), primary_key=True)
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), primary_key=True)
     status = db.Column(db.String(15))
 
 class Dish(db.Model):
@@ -64,6 +65,24 @@ class Supply(db.Model):
     supply_name = db.Column(db.String(127))
     quantity = db.Column(db.Integer)
     price_per_unit = db.Column(db.Integer)
+
+class Employee(db.Model):
+    emp_id = db.Column(db.Integer, primary_key=True)
+    emp_name = db.Column(db.String(127))
+    emp_pos = db.Column(db.String(63))
+    emp_addr = db.Column(db.String(255))
+    emp_phone = db.Column(db.String(15))
+    emp_email = db.Column(db.String(255))
+
+class RestaurantOrder(db.Model):
+    order_id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer)
+    order_time = db.Column(db.Time)
+
+class OrderDish(db.Model):
+    order_id = db.Column(db.Integer, db.ForeignKey('restaurant_order.order_id'), primary_key=True)
+    dish_id = db.Column(db.Integer, db.ForeignKey('dish.dish_id'), primary_key=True)
+    quantity = db.Column(db.Integer)
 
 @loginManager.user_loader
 def load_user(id):
