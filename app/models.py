@@ -109,6 +109,18 @@ class OrderDishSchema(ma.ModelSchema):
         fields = ('order_id', 'quantity', 'nested')
         nested = ma.Nested(DishSchema)
 
+class BuildingSchema(ma.ModelSchema):
+    class Meta:
+        model = Building
+
+class RoomSchema(ma.ModelSchema):
+    class Meta:
+        model = Room
+
+class RoomPriceSchema(ma.ModelSchema):
+    class Meta:
+        model = RoomPrice
+
 @loginManager.user_loader
 def load_user(id):
     return User.query.get(int(id))
