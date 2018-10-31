@@ -21,7 +21,7 @@ def login():
     if current_user.is_authenticated:
         return jsonify({'flag':1})
     data = json.loads(request.data)
-    user = User.query.filter(username=data['username']).first()
+    user = User.query.filter(User.username==data['username']).first()
     if user is None or not user.check_password(data['password']):
         return jsonify({'flag':0})
     login_user(user)
