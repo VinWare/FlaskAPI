@@ -1,7 +1,7 @@
 import datetime
 
 from flask import url_for, redirect, request, jsonify
-import json, requests, sys
+import json
 
 from app import app, db
 from flask_login import current_user, login_user, logout_user
@@ -32,29 +32,35 @@ def logout():
     logout_user()
     return jsonify({'flag':0})
 
-# @app.route('/room-check', methods=['GET', 'POST'])
-# def room_check():
-#     from_date_day = request.form['from-date-day']
-#     from_date_month = request.form['from-date-month']
-#     from_date_year = request.form['from-date-year']
-#     from_date = datetime.strptime(from_date_day + '/' + from_date_month + '/' + from_date_year, '%d/%m/%Y')
-#     to_date_day = request.form['to-date-day']
-#     to_date_month = request.form['to-date-month']
-#     to_date_year = request.form['to-date-year']
-#     to_date = datetime.strptime(to_date_day + '/' + to_date_month + '/' + to_date_year, '%d/%m/%Y')
-#     print(from_date)
-#     print(to_date)
-#     # type = request.form['type']
-#     # abcd = "SELECT room.type, room.room_num, building.build_name, room.num_ppl, room.default_price FROM room NATURAL JOIN building WHERE NOT EXISTS(SELECT * FROM room_res NATURAL JOIN reservation WHERE room_id = room.room_id AND  to_date >= from_date AND from_date <= to_date )"_
-#     act_result_query = db.session.query(Room).join(Building).filter(~db.session.query(Reservation).join(RoomRes).filter(RoomRes.room_id==Room.id, Reservation.to_date >= from_date, Reservation.from_date < to_date).exists()).filter(Room.type==type)
-#     act_result = act_result_query.all()
-#     print(act_result_query)
-#     print(act_result)
-#     print(type(act_result))
-#     roomSchema = RoomSchema(many=True)
-#     output = roomSchema.dump(act_result).data
-#     return jsonify(output)
+@app.route('/room-check', methods=['GET', 'POST'])
+def room_check():
+    json_data = json.loads(request.data)
+    from_date_day = json_data['fromDateDay']
+    from_date_month = json_data['fromDateMonth']
+    from_date_year = json_data['fromDateYear']
+    from_date = datetime.datetime.strptime(from_date_day + '/' + from_date_month + '/' + from_date_year, '%d/%m/%Y')
+    to_date_day = json_data['toDateDay']
+    to_date_month = json_data['toDateMonth']
+    to_date_year = json_data['toDateYear']
+    to_date = datetime.datetime.strptime(to_date_day + '/' + to_date_month + '/' + to_date_year, '%d/%m/%Y')
+    room_type = json_data['type']
+    print(from_date)
+    print(to_date)
+    # type = request.form['type']
+    # abcd = "SELECT room.type, room.room_num, building.build_name, room.num_ppl, room.default_price FROM room NATURAL JOIN building WHERE NOT EXISTS(SELECT * FROM room_res NATURAL JOIN reservation WHERE room_id = room.room_id AND  to_date >= from_date AND from_date <= to_date )"_
+    act_result_query = db.session.query(Room).join(Building).filter(~db.session.query(Reservation).join(RoomRes).filter(RoomRes.room_id==Room.id, Reservation.to_date >= from_date, Reservation.from_date < to_date).exists()).filter(Room.type==room_type)
+    act_result = act_result_query.all()
+    print(act_result_query)
+    print(act_result)
+    print(type(act_result))
+    roomSchema = RoomSchema(many=True)
+    output = roomSchema.dump(act_result).data
+    return jsonify(output)
     # return jsonify({'hey' : 'there'})
+
+@app.route('/reserve-room')
+def reserve_room():
+    data = json.loads(request.data)
 
 @app.route('/order-index')
 def order_index():
