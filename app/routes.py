@@ -1,12 +1,13 @@
 import datetime
 
 from flask import url_for, redirect, request, jsonify
+import json, requests, sys
 
 from app import app, db
 from flask_login import current_user, login_user, logout_user
 
 from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish, EmployeeSchema, OrderDishSchema, \
-    RestaurantOrderSchema, Reservation, RoomRes, Building, RoomSchema
+    RestaurantOrderSchema, Reservation, RoomRes, Building, RoomSchema, SupplyOrderSchema
 
 
 @app.route('/')
@@ -15,6 +16,8 @@ def index():
 
 @app.route('/check-login', methods=['POST'])
 def login():
+    if request == None:
+        return jsonify({'value':'nonetyperequest'})
     if current_user.is_authenticated:
         return jsonify({'flag':1})
     data = request.json
@@ -41,7 +44,7 @@ def room_check():
     to_date = datetime.strptime(to_date_day + '/' + to_date_month + '/' + to_date_year, '%d/%m/%Y')
     print(from_date)
     print(to_date)
-    type = request.form['type']
+    # type = request.form['type']
     # abcd = "SELECT room.type, room.room_num, building.build_name, room.num_ppl, room.default_price FROM room NATURAL JOIN building WHERE NOT EXISTS(SELECT * FROM room_res NATURAL JOIN reservation WHERE room_id = room.room_id AND  to_date >= from_date AND from_date <= to_date )"_
     act_result_query = db.session.query(Room).join(Building).filter(~db.session.query(Reservation).join(RoomRes).filter(RoomRes.room_id==Room.id, Reservation.to_date >= from_date, Reservation.from_date < to_date).exists()).filter(Room.type==type)
     act_result = act_result_query.all()
@@ -70,7 +73,17 @@ def order_index():
 
 @app.route('/supply-index')
 def supply_index():
-    return jsonify(Supply.query.all.filter(Supply.quantity > 0))
+    data = Supply.query.all()
+    print(type(data))
+    for datum in data:
+        for order in datum.orders:
+            print(order)
+    # data = OrderDish.query.all()
+    # orderDishSchema = OrderDishSchema(many=True)
+    # output = orderDishSchema.dump(data).data
+    supplyOrderSchema = SupplyOrderSchema(many=True)
+    output = supplyOrderSchema.dump(data).data
+    return jsonify(output)
 
 @app.route('/actual-order', methods=['POST'])
 def actual_order():

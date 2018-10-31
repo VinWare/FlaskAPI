@@ -35,6 +35,7 @@ class Room(db.Model):
     occupied = db.Column(db.Boolean)
     prices = db.relationship('RoomPrice', backref='room', lazy='dynamic')
     res = db.relationship('RoomRes', backref='room', lazy='dynamic')
+    supply_orders = db.relationship('SupplyOrder', backref='room', lazy='dynamic')
 
 class RoomPrice(db.Model):
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'), primary_key=True)
@@ -59,6 +60,16 @@ class Supply(db.Model):
     supply_name = db.Column(db.String(127))
     quantity = db.Column(db.Integer)
     price_per_unit = db.Column(db.Integer)
+    supply_parts = db.relationship('SupplyPart', backref='supply', lazy='dynamic')
+
+class SupplyOrder(db.Model):
+    order_id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+    supply_parts = db.relationship('SupplyPart', backref='order', lazy='dynamic')
+
+class SupplyPart(db.Model):
+    order_id = db.Column(db.Integer, db.ForeignKey('supply_order.order_id'), primary_key=True)
+    supply_id = db.Column(db.Integer, db.ForeignKey('supply.supply_id'), primary_key=True)
 
 class Employee(db.Model):
     emp_id = db.Column(db.Integer, primary_key=True)
@@ -77,12 +88,11 @@ class EmployeeSchema(ma.ModelSchema):
 
 class OrderDish(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('restaurant_order.order_id'), primary_key=True)
-    dish_id = db.Column(db.Integer, db.ForeignKey('dish.dish_id'), primary_key=True)
+    dish_name = db.Column(db.String(127), db.ForeignKey('dish.dish_name'), primary_key=True)
     quantity = db.Column(db.Integer)
 
 class Dish(db.Model):
-    dish_id = db.Column(db.Integer, primary_key=True)
-    dish_name = db.Column(db.String(127))
+    dish_name = db.Column(db.String(127), primary_key=True)
     dish_cost = db.Column(db.Integer)
     from_time = db.Column(db.Time)
     to_time = db.Column(db.Time)
@@ -120,6 +130,18 @@ class RoomSchema(ma.ModelSchema):
 class RoomPriceSchema(ma.ModelSchema):
     class Meta:
         model = RoomPrice
+
+class SupplySchema(ma.ModelSchema):
+    class Meta:
+        model = Supply
+
+class SupplyOrderSchema(ma.ModelSchema):
+    class Meta:
+        model = SupplyOrder
+
+class SupplyPartSchema(ma.ModelSchema):
+    class Meta:
+        model = SupplyPart
 
 @loginManager.user_loader
 def load_user(id):
