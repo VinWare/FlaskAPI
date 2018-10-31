@@ -20,9 +20,9 @@ def login():
         return jsonify({'value':'nonetyperequest'})
     if current_user.is_authenticated:
         return jsonify({'flag':1})
-    data = request.json
-    user = User.query.filter_by(username=data.get('username').first())
-    if user is None or not user.check_password(data.get('password')):
+    data = json.loads(request.data)
+    user = User.query.filter(username=data['username']).first()
+    if user is None or not user.check_password(data['password']):
         return jsonify({'flag':0})
     login_user(user)
     return jsonify({'flag':1})
