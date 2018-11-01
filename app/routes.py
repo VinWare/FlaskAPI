@@ -33,6 +33,8 @@ def logout():
 
 @app.route('/room-check', methods=['GET', 'POST'])
 def room_check():
+    if current_user.is_anonymous:
+        return jsonify({'flag':0})
     json_data = json.loads(request.data)
     from_date_day = json_data['fromDateDay']
     from_date_month = json_data['fromDateMonth']
