@@ -70,6 +70,7 @@ class SupplyOrder(db.Model):
 class SupplyPart(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('supply_order.order_id'), primary_key=True)
     supply_id = db.Column(db.Integer, db.ForeignKey('supply.supply_id'), primary_key=True)
+    quantity = db.Column(db.Integer)
 
 class Employee(db.Model):
     emp_id = db.Column(db.Integer, primary_key=True)

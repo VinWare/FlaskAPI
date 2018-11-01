@@ -99,6 +99,8 @@ def supply_index():
 
 @app.route('/supplies', methods=['GET', 'POST'])
 def supply():
+    if current_user.is_anonymous:
+        return jsonify({'flag':0})
     data = Supply.query.all()
     supplySchema = SupplySchema(many=True)
     output = supplySchema.dump(data).data
@@ -112,6 +114,17 @@ def actual_order():
     for order in request.form['orders']:
         orderDish = OrderDish(order_id=request.form['order_id'], dish_id=order['dish_id'], quantity=order['quantity'])
         db.session.add(orderDish)
+    db.commit()
+    return jsonify({"Result":"OK"})
+
+@app.route('/supply-order', methods=['POST'])
+def supply_order():
+    pass
+    supply = SupplyOrder(room_id=request.form['room_id'])
+    db.session.add(supply)
+    for order in request.form['orders']:
+        orderPart = SupplyPart(order_id=request.form['order_id'], supply_id=order['supply_id'], quantity=order['quantity'])
+        db.session.add(orderPart)
     db.commit()
     return jsonify({"Result":"OK"})
 
