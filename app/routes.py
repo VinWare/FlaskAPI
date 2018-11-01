@@ -33,8 +33,6 @@ def logout():
 
 @app.route('/room-check', methods=['GET', 'POST'])
 def room_check():
-    if current_user.is_anonymous:
-        return jsonify({'flag':0})
     json_data = json.loads(request.data)
     from_date_day = json_data['fromDateDay']
     from_date_month = json_data['fromDateMonth']
@@ -101,8 +99,6 @@ def supply_index():
 
 @app.route('/supplies', methods=['GET', 'POST'])
 def supply():
-    if current_user.is_anonymous:
-        return jsonify({'flag':0})
     data = Supply.query.all()
     supplySchema = SupplySchema(many=True)
     output = supplySchema.dump(data).data
