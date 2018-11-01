@@ -6,8 +6,7 @@ import json
 from app import app, db
 from flask_login import current_user, login_user, logout_user
 
-from app.models import User, Dish, Supply, Room, Employee, RestaurantOrder, OrderDish, EmployeeSchema, OrderDishSchema, \
-    RestaurantOrderSchema, Reservation, RoomRes, Building, RoomSchema, SupplyOrderSchema
+from app.models import *
 
 
 @app.route('/')
@@ -48,7 +47,7 @@ def room_check():
     print(to_date)
     # type = request.form['type']
     # abcd = "SELECT room.type, room.room_num, building.build_name, room.num_ppl, room.default_price FROM room NATURAL JOIN building WHERE NOT EXISTS(SELECT * FROM room_res NATURAL JOIN reservation WHERE room_id = room.room_id AND  to_date >= from_date AND from_date <= to_date )"_
-    act_result_query = db.session.query(Room).join(Building).filter(~db.session.query(Reservation).join(RoomRes).filter(RoomRes.room_id==Room.id, Reservation.to_date >= from_date, Reservation.from_date < to_date).exists()).filter(Room.type==room_type)
+    act_result_query = db.session.query(Room,Building).join(Building).filter(~db.session.query(Reservation).join(RoomRes).filter(RoomRes.room_id==Room.id, Reservation.to_date >= from_date, Reservation.from_date < to_date).exists()).filter(Room.type==room_type)
     act_result = act_result_query.all()
     print(act_result_query)
     print(act_result)
@@ -58,9 +57,19 @@ def room_check():
     return jsonify(output)
     # return jsonify({'hey' : 'there'})
 
-@app.route('/reserve-room')
+@app.route('/reserve-room', methods=['GET', 'POST'])
 def reserve_room():
-    data = json.loads(request.data)
+    # data = json.loads(request.data)
+    r = Reservation(cust_name="Hello", payment_method="CC", from_date=datetime.datetime.now().date(), to_date=datetime.datetime.now().date() + datetime.timedelta(days=2))
+    db.session.add(r)
+    db.session.flush()
+    print(r.res_id)
+    for i in range(2):
+        res = RoomRes(res_id=r.res_id, room_id=i)
+        db.session.add(res)
+        db.session.flush()
+    db.session.commit()
+    return jsonify({})
 
 @app.route('/order-index')
 def order_index():
@@ -77,18 +86,22 @@ def order_index():
     return jsonify(output)
     # return jsonify(Dish.query.all.filter(Dish.begin_time <= datetime.datetime.now().time()).filter(datetime.datetime.now().time() < Dish.to_time))
 
-@app.route('/supply-index')
+@app.route('/supply-index', methods=['GET', 'POST'])
 def supply_index():
-    data = Supply.query.all()
+    data = SupplyOrder.query.all()
     print(type(data))
-    for datum in data:
-        for order in datum.orders:
-            print(order)
     # data = OrderDish.query.all()
     # orderDishSchema = OrderDishSchema(many=True)
     # output = orderDishSchema.dump(data).data
     supplyOrderSchema = SupplyOrderSchema(many=True)
     output = supplyOrderSchema.dump(data).data
+    return jsonify(output)
+
+@app.route('/supplies', methods=['GET', 'POST'])
+def supply():
+    data = Supply.query.all()
+    supplySchema = SupplySchema(many=True)
+    output = supplySchema.dump(data).data
     return jsonify(output)
 
 @app.route('/actual-order', methods=['POST'])
@@ -101,11 +114,6 @@ def actual_order():
         db.session.add(orderDish)
     db.commit()
     return jsonify({"Result":"OK"})
-
-@app.route('/reserve')
-def reserve():
-    data = request.get_json()
-    pass
 
 @app.route('/emp-details', methods=['GET', 'POST'])
 def emp_details():
